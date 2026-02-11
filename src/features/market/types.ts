@@ -6,6 +6,7 @@ export interface GoldPrice {
   name: string; // Display name (Turkish)
   buyPrice: number; // Alış fiyatı (TL)
   sellPrice: number; // Satış fiyatı (TL)
+  dailyChangePercent?: number; // Günlük değişim yüzdesi (%)
 }
 
 export interface GoldPricesMap {

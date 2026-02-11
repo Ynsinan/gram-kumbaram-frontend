@@ -29,7 +29,7 @@ export const Header = () => {
       return <UserMenu />;
     }
 
-    return <LoginButton variant="outline" size="sm" />;
+    return <LoginButton variant="outline" size="sm" hideTextOnMobile />;
   };
 
   return (
@@ -37,17 +37,17 @@ export const Header = () => {
       className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur"
       role="banner"
     >
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+      <div className="container mx-auto flex h-14 items-center justify-between px-4 md:h-16">
         <Link
           href={PAGE_URLS.HOME}
-          className="text-xl font-bold transition-opacity hover:opacity-80"
+          className="text-base font-bold transition-opacity hover:opacity-80 sm:text-lg md:text-xl"
           aria-label="Ana sayfa - Gram Kumbaram"
         >
           <span className="gold-shimmer">Gram</span>
           <span className="ml-1">Kumbaram</span>
         </Link>
 
-        <nav className="flex items-center gap-2" aria-label="Ana navigasyon">
+        <nav className="flex items-center gap-1 sm:gap-2" aria-label="Ana navigasyon">
           {mounted && isAuthenticated && (
             <Button variant="ghost" asChild>
               <Link href={PAGE_URLS.DASHBOARD}>Portföy</Link>

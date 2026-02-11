@@ -19,7 +19,7 @@ export const LandingPage = () => {
       <section className="bg-muted/30 px-4 py-12">
         <div className="container mx-auto">
           <h2 className="mb-8 text-center text-2xl font-bold md:text-3xl">Canlı Altın Fiyatları</h2>
-          <GoldPriceTicker />
+          <GoldPriceTicker compact />
         </div>
       </section>
       {/* Hero Section */}

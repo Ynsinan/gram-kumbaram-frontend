@@ -3,33 +3,11 @@
 import { useEffect, useState } from "react";
 import { RefreshCw, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { useGetPricesQuery } from "../prices-api";
-import { GOLD_TYPE_LIST, type GoldPricesMap, type GoldTypeCode } from "../types";
+import { GOLD_TYPE_LIST } from "../types";
 import { cn, formatCurrency, formatDateTime } from "@/shared/utils/helpers";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
 import { Skeleton } from "@/shared/ui/skeleton";
-
-type PriceDirection = "up" | "down" | "neutral";
-
-interface PriceChange {
-  buyDirection: PriceDirection;
-  sellDirection: PriceDirection;
-}
-
-type PriceChanges = Record<GoldTypeCode, PriceChange>;
-
-const initialPriceChanges: PriceChanges = {
-  gram: { buyDirection: "neutral", sellDirection: "neutral" },
-  ceyrek: { buyDirection: "neutral", sellDirection: "neutral" },
-  yarim: { buyDirection: "neutral", sellDirection: "neutral" },
-  cumhuriyet: { buyDirection: "neutral", sellDirection: "neutral" },
-};
-
-const calculateDirection = (current: number, previous: number): PriceDirection => {
-  if (current > previous) return "up";
-  if (current < previous) return "down";
-  return "neutral";
-};
 
 interface GoldPriceTickerProps {
   compact?: boolean;
@@ -43,12 +21,11 @@ export const GoldPriceTicker = ({ compact = false, showRefresh = true }: GoldPri
     pollingInterval: 60000, // Refresh every 60 seconds
   });
 
-  // Store previous prices and price changes in state
-  const [previousPrices, setPreviousPrices] = useState<GoldPricesMap | null>(null);
-  const [priceChanges, setPriceChanges] = useState<PriceChanges>(initialPriceChanges);
-
   // Cooldown state for refresh button
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
+
+  // Auto-refresh countdown state (60 seconds polling)
+  const [autoRefreshCountdown, setAutoRefreshCountdown] = useState(60);
 
   // Cooldown timer
   useEffect(() => {
@@ -61,59 +38,17 @@ export const GoldPriceTicker = ({ compact = false, showRefresh = true }: GoldPri
     return () => clearInterval(timer);
   }, [cooldownSeconds]);
 
-  // Update price changes when data changes
+  // Auto-refresh countdown timer
   useEffect(() => {
-    if (!data?.prices) return;
-
-    // If we have previous prices, calculate changes
-    if (previousPrices) {
-      const changes: PriceChanges = { ...initialPriceChanges };
-
-      (Object.keys(data.prices) as GoldTypeCode[]).forEach((code) => {
-        const current = data.prices[code];
-        const previous = previousPrices[code];
-
-        if (current && previous) {
-          changes[code] = {
-            buyDirection: calculateDirection(current.buyPrice, previous.buyPrice),
-            sellDirection: calculateDirection(current.sellPrice, previous.sellPrice),
-          };
-        }
+    const timer = setInterval(() => {
+      setAutoRefreshCountdown((prev) => {
+        if (prev <= 1) return 60; // Reset when reaching 0
+        return prev - 1;
       });
+    }, 1000);
 
-      setPriceChanges(changes);
-    }
-
-    // Store current prices for next comparison
-    setPreviousPrices(data.prices);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data?.lastUpdated]); // Only trigger when lastUpdated changes
-
-  const getPriceChange = (code: GoldTypeCode): PriceChange => {
-    return priceChanges[code];
-  };
-
-  const renderDirectionIcon = (direction: PriceDirection, size: string) => {
-    if (direction === "up") {
-      return <TrendingUp className={cn(size, "text-green-500")} aria-hidden="true" />;
-    }
-    if (direction === "down") {
-      return <TrendingDown className={cn(size, "text-red-500")} aria-hidden="true" />;
-    }
-    return <Minus className={cn(size, "text-muted-foreground")} aria-hidden="true" />;
-  };
-
-  const getDirectionColor = (direction: PriceDirection): string => {
-    if (direction === "up") return "text-green-500";
-    if (direction === "down") return "text-red-500";
-    return "";
-  };
-
-  const getDirectionLabel = (direction: PriceDirection): string => {
-    if (direction === "up") return "yükseliyor";
-    if (direction === "down") return "düşüyor";
-    return "değişmedi";
-  };
+    return () => clearInterval(timer);
+  }, []);
 
   const handleRefresh = () => {
     if (cooldownSeconds > 0) return;
@@ -152,9 +87,10 @@ export const GoldPriceTicker = ({ compact = false, showRefresh = true }: GoldPri
   return (
     <section className="space-y-4" aria-label="Altın fiyatları">
       <div className="flex items-center justify-between">
-        <span className="text-muted-foreground text-xs">
-          Son güncelleme: {formatDateTime(data.lastUpdated)}
-        </span>
+        <div className="flex items-center gap-2 text-muted-foreground text-xs">
+          <span>Son güncelleme: {formatDateTime(data.lastUpdated)}</span>
+          <span className="text-muted-foreground/70">(Sonraki: {autoRefreshCountdown}s)</span>
+        </div>
         {showRefresh && (
           <Button
             variant="ghost"
@@ -166,7 +102,7 @@ export const GoldPriceTicker = ({ compact = false, showRefresh = true }: GoldPri
                 ? `${cooldownSeconds} saniye bekleyin`
                 : "Fiyatları yenile"
             }
-            className="min-w-[40px]"
+            className="min-w-10"
           >
             {cooldownSeconds > 0 ? (
               <span className="text-muted-foreground text-xs font-medium">{cooldownSeconds}</span>
@@ -185,12 +121,16 @@ export const GoldPriceTicker = ({ compact = false, showRefresh = true }: GoldPri
       >
         {GOLD_TYPE_LIST.map((goldType) => {
           const price = data.prices[goldType.code];
-          const priceChange = getPriceChange(goldType.code);
+          const dailyChange = price.dailyChangePercent ?? 0;
 
           return (
             <Card
               key={goldType.id}
-              className="transition-all hover:shadow-md"
+              className={cn(
+                "transition-all hover:shadow-md",
+                dailyChange > 0 && "border-green-500/20 bg-green-500/10",
+                dailyChange < 0 && "border-red-500/20 bg-red-500/10"
+              )}
               role="article"
               aria-label={`${goldType.name} fiyatları`}
             >
@@ -199,46 +139,57 @@ export const GoldPriceTicker = ({ compact = false, showRefresh = true }: GoldPri
                   <span className={cn("font-medium", compact ? "text-sm" : "text-base")}>
                     {goldType.name}
                   </span>
-                  {/* Overall trend indicator based on sell price */}
-                  {renderDirectionIcon(
-                    priceChange.sellDirection,
-                    compact ? "h-4 w-4" : "h-5 w-5"
-                  )}
+                  {/* Daily change percentage and trend indicator */}
+                  <div className="flex items-center gap-1">
+                    {dailyChange > 0 && (
+                      <TrendingUp className={cn(compact ? "h-4 w-4" : "h-5 w-5", "text-green-500")} aria-hidden="true" />
+                    )}
+                    {dailyChange < 0 && (
+                      <TrendingDown className={cn(compact ? "h-4 w-4" : "h-5 w-5", "text-red-500")} aria-hidden="true" />
+                    )}
+                    {dailyChange === 0 && (
+                      <Minus className={cn(compact ? "h-4 w-4" : "h-5 w-5", "text-muted-foreground")} aria-hidden="true" />
+                    )}
+                    <span
+                      className={cn(
+                        "text-xs font-semibold",
+                        dailyChange > 0
+                          ? "text-green-500"
+                          : dailyChange < 0
+                            ? "text-red-500"
+                            : "text-muted-foreground"
+                      )}
+                      aria-label={`Günlük değişim: ${dailyChange > 0 ? "+" : ""}${dailyChange.toFixed(2)}%`}
+                    >
+                      {dailyChange > 0 ? "+" : ""}
+                      {dailyChange.toFixed(2)}%
+                    </span>
+                  </div>
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground text-xs">Alış:</span>
-                    <div className="flex items-center gap-1">
-                      {renderDirectionIcon(priceChange.buyDirection, "h-3 w-3")}
-                      <span
-                        className={cn(
-                          "font-semibold transition-colors",
-                          compact ? "text-sm" : "text-base",
-                          getDirectionColor(priceChange.buyDirection)
-                        )}
-                        aria-label={`Alış fiyatı: ${formatCurrency(price.buyPrice)}, ${getDirectionLabel(priceChange.buyDirection)}`}
-                      >
-                        {formatCurrency(price.buyPrice)}
-                      </span>
-                    </div>
+                    <span
+                      className={cn(
+                        "font-semibold",
+                        compact ? "text-sm" : "text-base"
+                      )}
+                      aria-label={`Alış fiyatı: ${formatCurrency(price.buyPrice)}`}
+                    >
+                      {formatCurrency(price.buyPrice)}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground text-xs">Satış:</span>
-                    <div className="flex items-center gap-1">
-                      {renderDirectionIcon(priceChange.sellDirection, "h-3 w-3")}
-                      <span
-                        className={cn(
-                          "font-semibold transition-colors",
-                          compact ? "text-sm" : "text-base",
-                          priceChange.sellDirection !== "neutral"
-                            ? getDirectionColor(priceChange.sellDirection)
-                            : "text-primary"
-                        )}
-                        aria-label={`Satış fiyatı: ${formatCurrency(price.sellPrice)}, ${getDirectionLabel(priceChange.sellDirection)}`}
-                      >
-                        {formatCurrency(price.sellPrice)}
-                      </span>
-                    </div>
+                    <span
+                      className={cn(
+                        "font-semibold",
+                        compact ? "text-sm" : "text-base"
+                      )}
+                      aria-label={`Satış fiyatı: ${formatCurrency(price.sellPrice)}`}
+                    >
+                      {formatCurrency(price.sellPrice)}
+                    </span>
                   </div>
                 </div>
               </CardContent>

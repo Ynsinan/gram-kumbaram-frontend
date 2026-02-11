@@ -7,12 +7,14 @@ interface LoginButtonProps {
   className?: string;
   variant?: "default" | "outline" | "ghost";
   size?: "default" | "sm" | "lg";
+  hideTextOnMobile?: boolean;
 }
 
 export const LoginButton = ({
   className,
   variant = "default",
   size = "default",
+  hideTextOnMobile = false,
 }: LoginButtonProps) => {
   const { login, isLoading } = useAuth();
 
@@ -26,7 +28,7 @@ export const LoginButton = ({
       aria-label="Google ile giriş yap"
     >
       <svg
-        className="mr-2 h-4 w-4"
+        className="h-4 w-4 mr-2"
         viewBox="0 0 24 24"
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
@@ -48,7 +50,9 @@ export const LoginButton = ({
           d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
         />
       </svg>
-      Google ile Giriş Yap
+      <span className={hideTextOnMobile ? "hidden sm:inline" : ""}>
+        Google ile Giriş Yap
+      </span>
     </Button>
   );
 };

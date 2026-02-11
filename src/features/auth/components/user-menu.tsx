@@ -30,7 +30,7 @@ export const UserMenu = () => {
     .slice(0, 2);
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"

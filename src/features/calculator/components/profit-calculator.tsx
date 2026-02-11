@@ -57,11 +57,11 @@ export const ProfitCalculator = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="goldType">Altın Türü</Label>
             <Select value={goldType} onValueChange={(value) => setGoldType(value as GoldTypeCode)}>
-              <SelectTrigger id="goldType">
+              <SelectTrigger id="goldType" className="w-full">
                 <SelectValue placeholder="Altın türü seçin" />
               </SelectTrigger>
               <SelectContent>
@@ -93,7 +93,7 @@ export const ProfitCalculator = () => {
             <Skeleton className="h-16 w-full" />
           </div>
         ) : calculation ? (
-          <div className="grid grid-cols-2 gap-4 pt-4">
+          <div className="grid grid-cols-1 gap-4 pt-4 sm:grid-cols-2">
             {/* Buy Price Card */}
             <div className="space-y-2 rounded-lg border border-green-500/20 bg-green-500/10 p-4">
               <p className="text-muted-foreground text-sm">Alış Fiyatı</p>
