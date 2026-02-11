@@ -3,7 +3,7 @@
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useGetTransactionsQuery, useDeleteTransactionMutation } from "../transactions-api";
-import { GOLD_TYPES } from "@/features/market/types";
+import { GOLD_TYPES, GoldTypeEnum } from "@/features/market/types";
 import { cn, formatCurrency, formatShortDate, formatNumber } from "@/shared/utils/helpers";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
@@ -125,7 +125,7 @@ export const TransactionTable = () => {
                   </TableCell>
                   <TableCell>{goldTypeInfo?.name || tx.goldType}</TableCell>
                   <TableCell className="text-right">
-                    {formatNumber(tx.quantity, tx.goldType === "gram" ? 2 : 0)}
+                    {formatNumber(tx.quantity, tx.goldType === GoldTypeEnum.GRAM ? 2 : 0)}
                   </TableCell>
                   <TableCell className="text-right">{formatCurrency(tx.pricePerUnit)}</TableCell>
                   <TableCell className="text-right font-medium">{formatCurrency(total)}</TableCell>

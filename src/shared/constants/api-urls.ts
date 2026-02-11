@@ -13,7 +13,7 @@ export const API_AUTH = {
 // Prices endpoints
 export const API_PRICES = {
   BASE: "/api/prices",
-  BY_TYPE: (goldType: string) => `/api/prices/${goldType}`,
+  BY_TYPE: (goldType: number) => `/api/prices/${goldType}`,
 } as const;
 
 // Transactions endpoints

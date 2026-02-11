@@ -1,4 +1,4 @@
-import type { GoldTypeCode } from "@/features/market/types";
+import type { GoldTypeId } from "@/features/market/types";
 
 export type TransactionType = "BUY" | "SELL";
 
@@ -6,7 +6,7 @@ export interface GoldTransaction {
   id: string; // UUID
   userId: string;
   type: TransactionType;
-  goldType: GoldTypeCode;
+  goldType: GoldTypeId;
   quantity: number; // Always positive
   pricePerUnit: number; // Price at transaction time (TL)
   transactionDate: string;
@@ -15,7 +15,7 @@ export interface GoldTransaction {
 
 export interface CreateTransactionDto {
   type: TransactionType;
-  goldType: GoldTypeCode;
+  goldType: GoldTypeId;
   quantity: number;
   pricePerUnit: number;
   date: string; // YYYY-MM-DD
@@ -33,5 +33,5 @@ export interface TransactionResponse {
 
 export interface HoldingsResponse {
   success: boolean;
-  data: Record<GoldTypeCode, number>;
+  data: Record<GoldTypeId, number>;
 }

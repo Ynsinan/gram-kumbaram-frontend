@@ -7,7 +7,7 @@ import type {
   TransactionResponse,
   HoldingsResponse,
 } from "./types";
-import type { GoldTypeCode } from "@/features/market/types";
+import type { GoldTypeId } from "@/features/market/types";
 
 export const transactionsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -27,7 +27,7 @@ export const transactionsApi = baseApi.injectEndpoints({
       transformResponse: (response: TransactionResponse) => response.data,
       providesTags: (_result, _error, id) => [{ type: "Transactions", id }],
     }),
-    getHoldings: builder.query<Record<GoldTypeCode, number>, void>({
+    getHoldings: builder.query<Record<GoldTypeId, number>, void>({
       query: () => API_TRANSACTIONS.HOLDINGS,
       transformResponse: (response: HoldingsResponse) => response.data,
       providesTags: ["Holdings"],

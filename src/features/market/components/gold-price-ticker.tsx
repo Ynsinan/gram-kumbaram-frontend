@@ -120,7 +120,7 @@ export const GoldPriceTicker = ({ compact = false, showRefresh = true }: GoldPri
         )}
       >
         {GOLD_TYPE_LIST.map((goldType) => {
-          const price = data.prices[goldType.code];
+          const price = data.prices[goldType.id];
           const dailyChange = price.dailyChangePercent ?? 0;
 
           return (

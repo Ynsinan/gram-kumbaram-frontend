@@ -8,7 +8,7 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useCreateTransactionMutation } from "../transactions-api";
 import { useGetPricesQuery } from "@/features/market/prices-api";
-import { GOLD_TYPE_LIST, type GoldTypeCode } from "@/features/market/types";
+import { GOLD_TYPE_LIST, GoldTypeEnum, type GoldTypeId } from "@/features/market/types";
 import type { TransactionType } from "../types";
 import { formatCurrency } from "@/shared/utils/helpers";
 import { Button } from "@/shared/ui/button";
@@ -52,7 +52,9 @@ const parseTurkishNumber = (value: string): string => {
 
 const transactionSchema = z.object({
   type: z.enum(["BUY", "SELL"]),
-  goldType: z.enum(["gram", "ceyrek", "yarim", "cumhuriyet"]),
+  goldType: z.string().refine((val) => [1, 2, 3, 4].includes(Number(val)), {
+    message: "Geçersiz altın türü",
+  }),
   quantity: z.string().refine(
     (val) => {
       const num = parseFloat(parseTurkishNumber(val));
@@ -81,7 +83,7 @@ export const TransactionForm = () => {
     resolver: zodResolver(transactionSchema),
     defaultValues: {
       type: "BUY",
-      goldType: "gram",
+      goldType: String(GoldTypeEnum.GRAM),
       quantity: "1",
       pricePerUnit: "",
       date: new Date().toISOString().split("T")[0],
@@ -92,11 +94,12 @@ export const TransactionForm = () => {
   const transactionType = form.watch("type");
 
   const handleSetCurrentPrice = () => {
-    if (pricesData?.prices && selectedGoldType) {
+    const goldTypeId = Number(selectedGoldType) as GoldTypeId;
+    if (pricesData?.prices && goldTypeId) {
       const price =
         transactionType === "BUY"
-          ? pricesData.prices[selectedGoldType].buyPrice
-          : pricesData.prices[selectedGoldType].sellPrice;
+          ? pricesData.prices[goldTypeId].buyPrice
+          : pricesData.prices[goldTypeId].sellPrice;
       // Format price with Turkish locale
       const formatted = price.toLocaleString("tr-TR", {
         minimumFractionDigits: 2,
@@ -119,7 +122,7 @@ export const TransactionForm = () => {
     try {
       await createTransaction({
         type: values.type as TransactionType,
-        goldType: values.goldType as GoldTypeCode,
+        goldType: Number(values.goldType) as GoldTypeId,
         quantity: parseFloat(parseTurkishNumber(values.quantity)),
         pricePerUnit: parseFloat(parseTurkishNumber(values.pricePerUnit)),
         date: values.date,
@@ -146,10 +149,11 @@ export const TransactionForm = () => {
   };
 
   // Get current price for display
-  const currentPrice = pricesData?.prices?.[selectedGoldType]
+  const selectedGoldTypeId = Number(selectedGoldType) as GoldTypeId;
+  const currentPrice = pricesData?.prices?.[selectedGoldTypeId]
     ? transactionType === "BUY"
-      ? pricesData.prices[selectedGoldType].buyPrice
-      : pricesData.prices[selectedGoldType].sellPrice
+      ? pricesData.prices[selectedGoldTypeId].buyPrice
+      : pricesData.prices[selectedGoldTypeId].sellPrice
     : null;
 
   return (
@@ -206,7 +210,7 @@ export const TransactionForm = () => {
                     </FormControl>
                     <SelectContent>
                       {GOLD_TYPE_LIST.map((type) => (
-                        <SelectItem key={type.id} value={type.code}>
+                        <SelectItem key={type.id} value={String(type.id)}>
                           {type.name}
                         </SelectItem>
                       ))}

@@ -1,7 +1,7 @@
-import type { GoldTypeCode } from "@/features/market/types";
+import type { GoldTypeId } from "@/features/market/types";
 
 export interface PortfolioAsset {
-  goldType: GoldTypeCode;
+  goldType: GoldTypeId;
   netQuantity: number;
   averageCost: number;
   totalCost: number;

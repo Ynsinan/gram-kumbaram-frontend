@@ -1,7 +1,7 @@
 "use client";
 
 import { useGetPortfolioQuery } from "../portfolio-api";
-import { GOLD_TYPES } from "@/features/market/types";
+import { GOLD_TYPES, GoldTypeEnum, type GoldTypeId } from "@/features/market/types";
 import { cn, formatCurrency, formatNumber } from "@/shared/utils/helpers";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
@@ -10,11 +10,11 @@ import { Skeleton } from "@/shared/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import { PieChart, Pie, ResponsiveContainer, Legend } from "recharts";
 
-const CHART_COLORS = {
-  gram: "#10b981",
-  ceyrek: "#3b82f6",
-  yarim: "#f59e0b",
-  cumhuriyet: "#ef4444",
+const CHART_COLORS: Record<GoldTypeId, string> = {
+  [GoldTypeEnum.GRAM]: "#10b981",
+  [GoldTypeEnum.CEYREK]: "#3b82f6",
+  [GoldTypeEnum.YARIM]: "#f59e0b",
+  [GoldTypeEnum.CUMHURIYET]: "#ef4444",
 };
 
 export const PortfolioTable = () => {
@@ -133,7 +133,7 @@ export const PortfolioTable = () => {
                         {goldTypeInfo?.name || asset.goldType}
                       </TableCell>
                       <TableCell className="text-right">
-                        {formatNumber(asset.netQuantity, asset.goldType === "gram" ? 2 : 0)}
+                        {formatNumber(asset.netQuantity, asset.goldType === GoldTypeEnum.GRAM ? 2 : 0)}
                       </TableCell>
                       <TableCell className="text-right">{formatCurrency(asset.averageCost)}</TableCell>
                       <TableCell className="text-right">{formatCurrency(asset.currentPrice)}</TableCell>

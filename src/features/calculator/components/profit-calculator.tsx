@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { Calculator } from "lucide-react";
 import { useGetPricesQuery } from "@/features/market/prices-api";
-import { GOLD_TYPE_LIST, type GoldTypeCode } from "@/features/market/types";
+import { GOLD_TYPE_LIST, GoldTypeEnum, type GoldTypeId } from "@/features/market/types";
 import { formatCurrency } from "@/shared/utils/helpers";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
 import { Input } from "@/shared/ui/input";
@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export const ProfitCalculator = () => {
   const { data: pricesData, isLoading } = useGetPricesQuery();
-  const [goldType, setGoldType] = useState<GoldTypeCode>("gram");
+  const [goldType, setGoldType] = useState<GoldTypeId>(GoldTypeEnum.GRAM);
   const [quantity, setQuantity] = useState<string>("1");
 
   const calculation = useMemo(() => {
@@ -43,7 +43,7 @@ export const ProfitCalculator = () => {
     }
   };
 
-  const selectedGoldName = GOLD_TYPE_LIST.find((t) => t.code === goldType)?.name || "";
+  const selectedGoldName = GOLD_TYPE_LIST.find((t) => t.id === goldType)?.name || "";
 
   return (
     <Card className="mx-auto w-full max-w-lg">
@@ -60,13 +60,13 @@ export const ProfitCalculator = () => {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="goldType">Altın Türü</Label>
-            <Select value={goldType} onValueChange={(value) => setGoldType(value as GoldTypeCode)}>
+            <Select value={String(goldType)} onValueChange={(value) => setGoldType(Number(value) as GoldTypeId)}>
               <SelectTrigger id="goldType" className="w-full">
                 <SelectValue placeholder="Altın türü seçin" />
               </SelectTrigger>
               <SelectContent>
                 {GOLD_TYPE_LIST.map((type) => (
-                  <SelectItem key={type.id} value={type.code}>
+                  <SelectItem key={type.id} value={String(type.id)}>
                     {type.name}
                   </SelectItem>
                 ))}
