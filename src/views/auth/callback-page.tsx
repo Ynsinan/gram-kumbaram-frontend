@@ -18,7 +18,12 @@ export const CallbackPage = () => {
 
   useEffect(() => {
     const handleCallback = async () => {
-      const token = searchParams.get("token");
+      const tokenFromQuery = searchParams.get("token");
+      const tokenFromHash =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.hash.replace(/^#/, "")).get("token")
+          : null;
+      const token = tokenFromQuery || tokenFromHash;
       const errorParam = searchParams.get("error");
 
       if (errorParam) {
@@ -34,6 +39,11 @@ export const CallbackPage = () => {
       }
 
       try {
+        // Remove token from URL to reduce accidental sharing / screenshots
+        if (typeof window !== "undefined") {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
         // Store token in localStorage AND Redux store
         localStorage.setItem("token", token);
         dispatch(setToken(token));
