@@ -16,14 +16,14 @@ export const LandingPage = () => {
   return (
     <div className="flex min-h-[calc(100vh-4rem)] flex-col">
       {/* Live Prices Section */}
-      <section className="bg-muted/30 px-4 py-12">
+      <section className="bg-muted/30 py-12">
         <div className="container mx-auto">
           <h2 className="mb-8 text-center text-2xl font-bold md:text-3xl">Canlı Altın Fiyatları</h2>
           <GoldPriceTicker compact />
         </div>
       </section>
       {/* Hero Section */}
-      <section className="px-4 py-12 md:py-20">
+      <section className="py-12 md:py-20">
         <div className="container mx-auto max-w-4xl text-center">
           <h1 className="mb-6 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
             Fiziksel{" "}
@@ -58,7 +58,7 @@ export const LandingPage = () => {
       </section>
 
       {/* Calculator Section */}
-      <section id="calculator" className="bg-muted/30 px-4 py-12 md:py-20">
+      <section id="calculator" className="bg-muted/30 py-12 md:py-20">
         <div className="container mx-auto">
           <h2 className="mb-4 text-center text-2xl font-bold md:text-3xl">
             Altın Değer Hesaplayıcı
@@ -72,7 +72,7 @@ export const LandingPage = () => {
 
       {/* CTA Section */}
       {!isAuthenticated && (
-        <section className="px-4 py-12 md:py-20">
+        <section className="py-12 md:py-20">
           <div className="container mx-auto max-w-2xl text-center">
             <h2 className="mb-4 text-2xl font-bold md:text-3xl">Portföyünüzü Yönetmeye Başlayın</h2>
             <p className="text-muted-foreground mb-8">
@@ -84,7 +84,7 @@ export const LandingPage = () => {
       )}
 
       {/* Features Section */}
-      <section className="px-4 py-12 md:py-20">
+      <section className="py-12 md:py-20">
         <div className="container mx-auto">
           <h2 className="mb-12 text-center text-2xl font-bold md:text-3xl">Neden Gram Kumbaram?</h2>
           <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
@@ -133,7 +133,7 @@ export const LandingPage = () => {
         </div>
       </section>
       {/* Footer */}
-      <footer className="mt-auto border-t px-4 py-6">
+      <footer className="mt-auto border-t py-6">
         <div className="text-muted-foreground container mx-auto text-center text-sm">
           <p>© 2026 Gram Kumbaram. Tüm hakları saklıdır.</p>
         </div>

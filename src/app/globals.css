@@ -127,7 +127,13 @@
 
 .container {
   max-width: 1140px;
-  padding-inline: 1.5rem;
+  padding-inline: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding-inline: 1.5rem;
+  }
 }
 
 /* Gold Shimmer Effect for "Gram" text */
