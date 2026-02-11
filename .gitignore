@@ -30,14 +30,17 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (active files only)
+# env files
 .env
 .env.local
+.env.production
 .env.*.local
+# .env.example is kept in git as a template
 
-# Keep template files in git
-# .env.example
-# .env.production
+# IDE
+.vscode/
+.cursor/
+.idea/
 
 # vercel
 .vercel
