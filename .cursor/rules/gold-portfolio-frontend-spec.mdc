@@ -1,0 +1,308 @@
+---
+description: Gold Portfolio Tracker Frontend - Feature-Based Architecture Rules
+alwaysApply: true
+---
+
+# Gold Portfolio Tracker Frontend – Project Specification
+
+Use this document as the single source of truth. We are using a **Feature-Based Architecture**.
+
+---
+
+## 1. Project Overview
+
+- **Type:** Frontend Web Application (Next.js 14+ App Router).
+- **Goal:** Public gold price tracking & Guest calculator + Authenticated Portfolio Management.
+- **Access:**
+  - **Public:** Landing page, Live Ticker, Profit Calculator (No DB save).
+  - **Private:** Dashboard, Transaction History (Requires Google Login).
+- **Deployment:** Dockerized for Dokploy.
+
+---
+
+## 2. Tech Stack
+
+- **Framework:** Next.js 14+ (App Router)
+- **Language:** TypeScript
+- **State:** Redux Toolkit (RTK) + RTK Query
+- **Styling:** Tailwind CSS + Shadcn UI (Dark/Light Mode)
+- **Architecture:** **Feature-Based** (`features/`, `views/`, `shared/`)
+
+---
+
+## 3. Folder Structure (Strict)
+
+Organize code by **Business Value (Feature)**, not technical type.
+
+**File Naming: kebab-case** - All files MUST use kebab-case (e.g., `login-button.tsx`, `auth-slice.ts`)
+**No Barrel Exports** - Do NOT use `index.ts` files. Import directly from the source file.
+
+```text
+src/
+├── app/                  # Next.js App Router (Routing Only)
+│   ├── layout.tsx        # Root Layout (Providers)
+│   ├── page.tsx          # Imports from @/views/landing/landing-page
+│   ├── (auth)/...        # Route groups
+│   └── dashboard/...     # Route groups
+├── views/                # Page-Level Components (Views)
+│   ├── landing/
+│   │   └── landing-page.tsx
+│   ├── dashboard/
+│   │   └── dashboard-page.tsx
+│   └── auth/
+│       ├── login-page.tsx
+│       └── callback-page.tsx
+├── features/             # Business Logic & Domain Components
+│   ├── auth/
+│   │   ├── auth-api.ts
+│   │   ├── auth-slice.ts
+│   │   ├── types.ts
+│   │   └── components/
+│   │       ├── login-button.tsx
+│   │       ├── protected-route.tsx
+│   │       └── user-menu.tsx
+│   ├── market/
+│   │   ├── prices-api.ts
+│   │   ├── types.ts
+│   │   └── components/
+│   │       └── gold-price-ticker.tsx
+│   ├── portfolio/
+│   │   ├── portfolio-api.ts
+│   │   ├── types.ts
+│   │   └── components/
+│   │       ├── portfolio-summary.tsx
+│   │       └── portfolio-table.tsx
+│   ├── calculator/
+│   │   └── components/
+│   │       └── profit-calculator.tsx
+│   └── transactions/
+│       ├── transactions-api.ts
+│       ├── types.ts
+│       └── components/
+│           ├── transaction-form.tsx
+│           └── transaction-table.tsx
+├── shared/               # Reusable / Generic Code
+│   ├── ui/               # Shadcn Components (kebab-case)
+│   │   ├── button.tsx
+│   │   ├── card.tsx
+│   │   ├── header.tsx
+│   │   └── theme-toggle.tsx
+│   ├── hooks/
+│   │   ├── use-auth.ts
+│   │   └── use-theme.ts
+│   ├── utils/
+│   │   └── helpers.ts    # cn(), formatCurrency, etc.
+│   └── api/
+│       └── base-api.ts
+├── store/                # Redux Store Configuration
+│   ├── store.ts
+│   ├── store-provider.tsx
+│   └── hooks.ts
+└── styles/               # globals.css
+```
+
+---
+
+## 4. Code Implementation Guidelines (Strict)
+
+Follow these rules when writing code:
+
+### 4.1 Early Returns
+- Use early returns whenever possible to make the code more readable.
+- Exit early from functions when conditions are not met.
+
+```typescript
+// ✅ Good - Early return
+const MyComponent = ({ user }: Props) => {
+  if (!user) return null;
+  if (user.isLoading) return <Loading />;
+  
+  return <UserProfile user={user} />;
+};
+
+// ❌ Bad - Nested conditionals
+const MyComponent = ({ user }: Props) => {
+  return (
+    <>
+      {user ? (
+        user.isLoading ? <Loading /> : <UserProfile user={user} />
+      ) : null}
+    </>
+  );
+};
+```
+
+### 4.2 Styling with Tailwind
+- Always use Tailwind CSS classes for styling HTML elements.
+- **NEVER** use inline CSS styles or `<style>` tags.
+- Use `cn()` utility from `@/shared/utils/helpers` for conditional classes.
+
+```typescript
+// ✅ Good - cn() for conditional classes
+import { cn } from "@/shared/utils/helpers";
+
+<div className={cn(
+  "flex items-center gap-2",
+  isActive && "bg-primary text-white",
+  isDisabled && "opacity-50 cursor-not-allowed"
+)} />
+
+// ❌ Bad - Ternary in className
+<div className={`flex items-center gap-2 ${isActive ? "bg-primary text-white" : ""}`} />
+
+// ❌ Bad - Inline styles
+<div style={{ display: "flex", alignItems: "center" }} />
+```
+
+### 4.3 File Naming & Imports
+- **ALL files MUST use kebab-case** (e.g., `login-button.tsx`, `auth-slice.ts`)
+- **NO barrel exports** - Do NOT use `index.ts` files
+- Import directly from the source file
+
+```typescript
+// ✅ Good - Direct imports with kebab-case files
+import { LoginButton } from "@/features/auth/components/login-button";
+import { useAuth } from "@/shared/hooks/use-auth";
+import { cn, formatCurrency } from "@/shared/utils/helpers";
+import { GoldPriceTicker } from "@/features/market/components/gold-price-ticker";
+
+// ❌ Bad - Barrel imports (index.ts)
+import { LoginButton, UserMenu } from "@/features/auth";
+import { useAuth } from "@/shared/hooks";
+import { cn } from "@/shared/utils";
+
+// ❌ Bad - PascalCase or camelCase file names
+import { LoginButton } from "@/features/auth/components/LoginButton";
+import { useAuth } from "@/shared/hooks/useAuth";
+```
+
+### 4.4 Variable & Function Naming
+- Use descriptive variable and function names.
+- Event handler functions MUST have `handle` prefix.
+- Use camelCase for variables and functions.
+- Use PascalCase for components and types.
+
+```typescript
+// ✅ Good - Descriptive names with handle prefix
+const handleClick = () => { ... };
+const handleSubmit = () => { ... };
+const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => { ... };
+const handleKeyDown = (e: React.KeyboardEvent) => { ... };
+
+// ❌ Bad - Non-descriptive names
+const onClick = () => { ... };
+const submit = () => { ... };
+const change = () => { ... };
+```
+
+### 4.5 Arrow Functions & Types
+- Use `const` with arrow functions instead of function declarations.
+- Always define TypeScript types for function parameters.
+
+```typescript
+// ✅ Good - Arrow function with type
+type HandleClickProps = {
+  id: string;
+  action: "edit" | "delete";
+};
+
+const handleClick = ({ id, action }: HandleClickProps) => {
+  // ...
+};
+
+// ❌ Bad - Function declaration
+function handleClick(id, action) {
+  // ...
+}
+```
+
+### 4.6 Accessibility (a11y)
+- Interactive elements MUST have proper accessibility attributes.
+- Use semantic HTML elements (`<button>`, `<nav>`, `<main>`, etc.).
+- Required attributes for interactive elements:
+  - `aria-label` for icon-only buttons
+  - `tabIndex={0}` for non-button clickable elements
+  - `onKeyDown` handler for keyboard navigation
+  - `role` attribute when semantic element isn't used
+
+```typescript
+// ✅ Good - Accessible button
+<button
+  onClick={handleClick}
+  onKeyDown={handleKeyDown}
+  aria-label="Sepete ekle"
+  disabled={isLoading}
+>
+  <ShoppingCart className="h-4 w-4" />
+</button>
+
+// ✅ Good - Accessible clickable div (when button isn't suitable)
+<div
+  role="button"
+  tabIndex={0}
+  onClick={handleClick}
+  onKeyDown={(e) => e.key === "Enter" && handleClick()}
+  aria-label="Ürünü seç"
+>
+  ...
+</div>
+
+// ❌ Bad - Missing accessibility
+<div onClick={handleClick}>
+  <ShoppingCart />
+</div>
+```
+
+### 4.7 Component Structure
+- Components should follow this order:
+  1. Imports
+  2. Types/Interfaces
+  3. Component definition
+  4. Hooks (useState, useEffect, custom hooks)
+  5. Derived state / memoized values
+  6. Event handlers
+  7. Early returns (loading, error states)
+  8. Main render
+
+```typescript
+"use client";
+
+import { useState, useMemo } from "react";
+import { Button } from "@/shared/ui/button";
+import type { User } from "./types";
+
+interface UserCardProps {
+  user: User;
+  onEdit: (id: string) => void;
+}
+
+export const UserCard = ({ user, onEdit }: UserCardProps) => {
+  // 1. Hooks
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  // 2. Derived state
+  const fullName = useMemo(() => `${user.firstName} ${user.lastName}`, [user]);
+  
+  // 3. Event handlers
+  const handleToggleExpand = () => {
+    setIsExpanded((prev) => !prev);
+  };
+  
+  const handleEditClick = () => {
+    onEdit(user.id);
+  };
+  
+  // 4. Early returns
+  if (!user) return null;
+  
+  // 5. Main render
+  return (
+    <div className="rounded-lg border p-4">
+      <h3>{fullName}</h3>
+      <Button onClick={handleEditClick} aria-label="Kullanıcıyı düzenle">
+        Düzenle
+      </Button>
+    </div>
+  );
+};
+```
