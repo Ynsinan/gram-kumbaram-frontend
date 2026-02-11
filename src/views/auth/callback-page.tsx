@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useAppDispatch } from "@/store/hooks";
-import { setToken, setCredentials } from "@/features/auth/auth-slice";
-import { useLazyGetMeQuery } from "@/features/auth/auth-api";
+import { setCredentials } from "@/features/auth/auth-slice";
+import { useExchangeCodeMutation } from "@/features/auth/auth-api";
 import { PAGE_URLS } from "@/shared/constants/page-urls";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Skeleton } from "@/shared/ui/skeleton";
@@ -19,7 +19,7 @@ const getErrorMessage = (error: string): { title: string; description?: string }
       title: "Çok fazla giriş denemesi",
       description: "Lütfen 1 dakika bekleyip tekrar deneyin.",
     },
-    token_not_found: { title: "Giriş hatası", description: "Token bulunamadı." },
+    code_not_found: { title: "Giriş hatası", description: "Authorization code bulunamadı." },
   };
 
   return errorMap[error] || { title: "Bir hata oluştu", description: error };
@@ -29,17 +29,17 @@ export const CallbackPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
-  const [getMe] = useLazyGetMeQuery();
+  const [exchangeCode] = useExchangeCodeMutation();
   const [hasError, setHasError] = useState(false);
+  const hasProcessedRef = useRef(false);
 
   useEffect(() => {
+    // Prevent multiple executions
+    if (hasProcessedRef.current) return;
+    hasProcessedRef.current = true;
+
     const handleCallback = async () => {
-      const tokenFromQuery = searchParams.get("token");
-      const tokenFromHash =
-        typeof window !== "undefined"
-          ? new URLSearchParams(window.location.hash.replace(/^#/, "")).get("token")
-          : null;
-      const token = tokenFromQuery || tokenFromHash;
+      const code = searchParams.get("code");
       const errorParam = searchParams.get("error");
 
       if (errorParam) {
@@ -50,30 +50,37 @@ export const CallbackPage = () => {
         return;
       }
 
-      if (!token) {
+      if (!code) {
         setHasError(true);
-        const { title, description } = getErrorMessage("token_not_found");
+        const { title, description } = getErrorMessage("code_not_found");
         toast.error(title, { description });
         setTimeout(() => router.push(PAGE_URLS.AUTH.LOGIN), 2000);
         return;
       }
 
       try {
-        // Remove token from URL to reduce accidental sharing / screenshots
+        // Remove code from URL immediately
         if (typeof window !== "undefined") {
           window.history.replaceState({}, document.title, window.location.pathname);
         }
 
-        // Store token in localStorage AND Redux store
-        localStorage.setItem("token", token);
-        dispatch(setToken(token));
+        // Exchange authorization code for token
+        const response = await exchangeCode({ code }).unwrap();
 
-        // Small delay to ensure token is in store
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        // Store token in localStorage
+        localStorage.setItem("token", response.data.token);
 
-        // Get user data
-        const userData = await getMe().unwrap();
-        dispatch(setCredentials({ user: userData, token }));
+        // Store credentials in Redux
+        dispatch(
+          setCredentials({
+            user: {
+              id: response.data.user.id,
+              email: response.data.user.email,
+              name: response.data.user.name,
+            },
+            token: response.data.token,
+          })
+        );
 
         // Başarılı giriş bildirimi
         toast.success("Giriş başarılı!", {
@@ -94,7 +101,8 @@ export const CallbackPage = () => {
     };
 
     handleCallback();
-  }, [searchParams, router, getMe, dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (hasError) {
     return (

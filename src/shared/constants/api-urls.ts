@@ -7,6 +7,7 @@
 export const API_AUTH = {
   ME: "/auth/me",
   GOOGLE: "/auth/google",
+  EXCHANGE: "/auth/exchange",
 } as const;
 
 // Prices endpoints
