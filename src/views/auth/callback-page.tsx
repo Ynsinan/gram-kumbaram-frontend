@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 import { useAppDispatch } from "@/store/hooks";
 import { setToken, setCredentials } from "@/features/auth/auth-slice";
 import { useLazyGetMeQuery } from "@/features/auth/auth-api";
@@ -9,12 +10,27 @@ import { PAGE_URLS } from "@/shared/constants/page-urls";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Skeleton } from "@/shared/ui/skeleton";
 
+// Hata mesajlarını kullanıcı dostu metinlere çevir
+const getErrorMessage = (error: string): { title: string; description?: string } => {
+  const errorMap: Record<string, { title: string; description?: string }> = {
+    auth_failed: { title: "Giriş başarısız", description: "Google ile giriş yapılamadı." },
+    no_user: { title: "Kullanıcı bulunamadı", description: "Lütfen tekrar deneyin." },
+    rate_limit: {
+      title: "Çok fazla giriş denemesi",
+      description: "Lütfen 1 dakika bekleyip tekrar deneyin.",
+    },
+    token_not_found: { title: "Giriş hatası", description: "Token bulunamadı." },
+  };
+
+  return errorMap[error] || { title: "Bir hata oluştu", description: error };
+};
+
 export const CallbackPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const [getMe] = useLazyGetMeQuery();
-  const [error, setError] = useState<string | null>(null);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -27,14 +43,18 @@ export const CallbackPage = () => {
       const errorParam = searchParams.get("error");
 
       if (errorParam) {
-        setError(errorParam);
-        setTimeout(() => router.push(PAGE_URLS.AUTH.LOGIN), 3000);
+        setHasError(true);
+        const { title, description } = getErrorMessage(errorParam);
+        toast.error(title, { description });
+        setTimeout(() => router.push(PAGE_URLS.AUTH.LOGIN), 2000);
         return;
       }
 
       if (!token) {
-        setError("Token bulunamadı");
-        setTimeout(() => router.push(PAGE_URLS.AUTH.LOGIN), 3000);
+        setHasError(true);
+        const { title, description } = getErrorMessage("token_not_found");
+        toast.error(title, { description });
+        setTimeout(() => router.push(PAGE_URLS.AUTH.LOGIN), 2000);
         return;
       }
 
@@ -55,29 +75,40 @@ export const CallbackPage = () => {
         const userData = await getMe().unwrap();
         dispatch(setCredentials({ user: userData, token }));
 
+        // Başarılı giriş bildirimi
+        toast.success("Giriş başarılı!", {
+          description: "Hoş geldiniz, yönlendiriliyorsunuz...",
+        });
+
         // Redirect to dashboard
-        router.push(PAGE_URLS.DASHBOARD);
+        setTimeout(() => router.push(PAGE_URLS.DASHBOARD), 500);
       } catch (err) {
         console.error("Auth callback error:", err);
-        setError("Giriş işlemi başarısız oldu");
+        setHasError(true);
+        toast.error("Giriş işlemi başarısız", {
+          description: "Lütfen tekrar deneyin.",
+        });
         localStorage.removeItem("token");
-        setTimeout(() => router.push(PAGE_URLS.AUTH.LOGIN), 3000);
+        setTimeout(() => router.push(PAGE_URLS.AUTH.LOGIN), 2000);
       }
     };
 
     handleCallback();
   }, [searchParams, router, getMe, dispatch]);
 
-  if (error) {
+  if (hasError) {
     return (
       <div className="flex min-h-screen items-center justify-center px-4">
         <Card className="w-full max-w-md">
-          <CardContent className="pt-6 text-center">
-            <p className="text-destructive mb-2 font-medium">Hata</p>
-            <p className="text-muted-foreground">{error}</p>
-            <p className="text-muted-foreground mt-4 text-sm">
-              Giriş sayfasına yönlendiriliyorsunuz...
-            </p>
+          <CardContent className="space-y-4 pt-6">
+            <div className="text-center">
+              <p className="mb-2 font-medium">Giriş sayfasına yönlendiriliyorsunuz...</p>
+              <p className="text-muted-foreground text-sm">Lütfen bekleyin.</p>
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="mx-auto h-4 w-3/4" />
+            </div>
           </CardContent>
         </Card>
       </div>

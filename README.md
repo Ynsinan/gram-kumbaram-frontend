@@ -1,4 +1,15 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gold Portfolio Tracker Frontend
+
+A Next.js 14+ application for tracking physical gold investments with real-time price data and portfolio management.
+
+> **For AI-Assisted Development**: This project includes a [`CLAUDE.md`](./CLAUDE.md) file with detailed architecture, coding conventions, and business logic for AI-assisted development with Claude Code.
+
+## Features
+
+- **Public Access**: Live gold price ticker and profit calculator
+- **Authenticated Access**: Personal portfolio dashboard and transaction history
+- **Feature-Based Architecture**: Code organized by business domain
+- **Modern Stack**: Next.js 14+ App Router, TypeScript, Redux Toolkit, Tailwind CSS, Shadcn UI
 
 ## Getting Started
 

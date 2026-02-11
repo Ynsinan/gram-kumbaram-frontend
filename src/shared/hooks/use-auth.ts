@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   setCredentials,
@@ -20,6 +21,8 @@ export const useAuth = () => {
   );
   const [getMe] = useLazyGetMeQuery();
   const initializingRef = useRef(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const lastLoginAttemptRef = useRef<number>(0);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -49,6 +52,28 @@ export const useAuth = () => {
   }, [dispatch, getMe, isInitialized]);
 
   const handleLogin = () => {
+    const now = Date.now();
+    const timeSinceLastAttempt = now - lastLoginAttemptRef.current;
+    const cooldownPeriod = 3000; // 3 saniye
+
+    // Rate limiting kontrolü
+    if (timeSinceLastAttempt < cooldownPeriod) {
+      const remainingSeconds = Math.ceil((cooldownPeriod - timeSinceLastAttempt) / 1000);
+      toast.warning("Çok hızlı tıklıyorsunuz", {
+        description: `Lütfen ${remainingSeconds} saniye bekleyin.`,
+      });
+      return;
+    }
+
+    // Zaten yönlendirme yapılıyorsa tekrar yapma
+    if (isRedirecting) {
+      toast.info("Giriş sayfasına yönlendiriliyorsunuz...");
+      return;
+    }
+
+    lastLoginAttemptRef.current = now;
+    setIsRedirecting(true);
+
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
     window.location.href = `${apiUrl}${API_AUTH.GOOGLE}`;
   };
@@ -65,7 +90,7 @@ export const useAuth = () => {
     user,
     token,
     isAuthenticated,
-    isLoading,
+    isLoading: isLoading || isRedirecting,
     isInitialized,
     error,
     login: handleLogin,
