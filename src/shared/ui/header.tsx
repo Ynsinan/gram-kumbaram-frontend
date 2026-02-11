@@ -50,7 +50,7 @@ export const Header = () => {
         <nav className="flex items-center gap-2" aria-label="Ana navigasyon">
           {mounted && isAuthenticated && (
             <Button variant="ghost" asChild>
-              <Link href={PAGE_URLS.DASHBOARD}>Dashboard</Link>
+              <Link href={PAGE_URLS.DASHBOARD}>Portföy</Link>
             </Button>
           )}
           <ThemeToggle />

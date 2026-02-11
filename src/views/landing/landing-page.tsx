@@ -43,7 +43,7 @@ export const LandingPage = () => {
             {isAuthenticated ? (
               <Button size="lg" asChild>
                 <Link href={PAGE_URLS.DASHBOARD}>
-                  Dashboard&apos;a Git
+                  Portföye Git
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { TrendingUp, TrendingDown, Wallet, PiggyBank } from "lucide-react";
+import { TrendingUp, TrendingDown, Wallet, Coins } from "lucide-react";
 import { useGetPortfolioQuery } from "../portfolio-api";
 import { formatCurrency, formatNumber, calculateProfitPercentage } from "@/shared/utils/helpers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
@@ -56,7 +56,7 @@ export const PortfolioSummaryCard = () => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Toplam Maliyet</CardTitle>
-          <PiggyBank className="text-muted-foreground h-4 w-4" />
+          <Coins className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(portfolio.totalCost)}</div>

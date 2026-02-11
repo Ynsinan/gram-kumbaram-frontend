@@ -55,7 +55,7 @@ export const UserMenu = () => {
         <DropdownMenuItem asChild>
           <Link href={PAGE_URLS.DASHBOARD} className="flex cursor-pointer items-center">
             <UserIcon className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
+            <span>Portföy</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
