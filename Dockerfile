@@ -5,34 +5,39 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
+# Paket dosyalarını kopyala
 COPY package*.json ./
 
-# Install dependencies
+# Bağımlılıkları yükle
 RUN npm ci
 
-# Copy source code
+# Kaynak kodları kopyala
 COPY . .
 
-# Set environment variable for build
+# Ortam değişkenlerini al (Build sırasında gereklidir)
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
-# Build the application
+# Projeyi derle (Build)
 RUN npm run build
 
 # ============================================
-# Stage 2: Production (nginx)
+# Stage 2: Production (Node.js - npm start)
 # ============================================
-FROM nginx:alpine
+FROM node:20-alpine AS runner
 
-# Copy built static files from builder
-COPY --from=builder /app/out /usr/share/nginx/html
+WORKDIR /app
 
-# Copy custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+ENV NODE_ENV=production
 
-# Expose port
-EXPOSE 80
+# Sadece gerekli dosyaları builder aşamasından al
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/node_modules ./node_modules
 
-CMD ["nginx", "-g", "daemon off;"]
+# Portu 3000 olarak ayarla (Standart Next.js portu)
+EXPOSE 3000
+
+# Uygulamayı başlat
+CMD ["npm", "start"]
