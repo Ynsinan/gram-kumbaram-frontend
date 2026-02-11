@@ -12,6 +12,7 @@ import {
 } from "@/features/auth/auth-slice";
 import { useLazyGetMeQuery } from "@/features/auth/auth-api";
 import { API_AUTH } from "@/shared/constants/api-urls";
+import { env } from "@/shared/config/env";
 import type { User } from "@/features/auth/types";
 
 export const useAuth = () => {
@@ -74,8 +75,7 @@ export const useAuth = () => {
     lastLoginAttemptRef.current = now;
     setIsRedirecting(true);
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    window.location.href = `${apiUrl}${API_AUTH.GOOGLE}`;
+    window.location.href = `${env.API_URL}${API_AUTH.GOOGLE}`;
   };
 
   const handleLogout = () => {

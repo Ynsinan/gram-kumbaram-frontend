@@ -4,7 +4,16 @@ import { ThemeProvider } from "next-themes";
 import { StoreProvider } from "@/store/store-provider";
 import { Header } from "@/shared/ui/header";
 import { Toaster } from "@/shared/ui/sonner";
+import { validateEnv, logEnvConfig } from "@/shared/config/env";
 import "./globals.css";
+
+// Validate environment variables on app initialization
+validateEnv();
+
+// Log environment configuration in development
+if (process.env.NODE_ENV === "development") {
+  logEnvConfig();
+}
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
