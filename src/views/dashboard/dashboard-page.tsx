@@ -11,7 +11,7 @@ export const DashboardPage = () => {
   const { user } = useAuth();
 
   return (
-    <div className="container mx-auto space-y-8 px-4 py-6">
+    <div className="container mx-auto space-y-8 py-6">
       {/* Welcome Section */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>

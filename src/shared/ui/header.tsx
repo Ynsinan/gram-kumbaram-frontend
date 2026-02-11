@@ -37,7 +37,7 @@ export const Header = () => {
       className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur"
       role="banner"
     >
-      <div className="container mx-auto flex h-14 items-center justify-between px-4 md:h-16">
+      <div className="container mx-auto flex h-14 items-center justify-between md:h-16">
         <Link
           href={PAGE_URLS.HOME}
           className="text-base font-bold transition-opacity hover:opacity-80 sm:text-lg md:text-xl"

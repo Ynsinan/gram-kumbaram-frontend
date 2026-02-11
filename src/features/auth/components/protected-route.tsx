@@ -14,7 +14,7 @@ interface ProtectedRouteProps {
 const DashboardSkeleton = () => {
   return (
     <div
-      className="container mx-auto space-y-8 px-4 py-6"
+      className="container mx-auto space-y-8 py-6"
       role="status"
       aria-label="Dashboard yükleniyor"
     >

@@ -125,6 +125,11 @@
   }
 }
 
+.container {
+  max-width: 1140px;
+  padding-inline: 1.5rem;
+}
+
 /* Gold Shimmer Effect for "Gram" text */
 .gold-shimmer {
   background: linear-gradient(
