@@ -46,7 +46,7 @@ export const LoginPage = () => {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4" aria-label="Giriş sayfası">
+    <div className="flex min-h-screen items-center justify-center px-4" aria-label="Giriş sayfası">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl">
@@ -70,6 +70,6 @@ export const LoginPage = () => {
           </p>
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 };

@@ -9,12 +9,14 @@ import { ProfitCalculator } from "@/features/calculator/components/profit-calcul
 import { LoginButton } from "@/features/auth/components/login-button";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { LandingStructuredData } from "@/features/seo/landing-structured-data";
 
 export const LandingPage = () => {
   const { isAuthenticated } = useAuth();
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] flex-col">
+      <LandingStructuredData />
       {/* Live Prices Section */}
       <section className="bg-muted/30 py-12">
         <div className="container mx-auto">
