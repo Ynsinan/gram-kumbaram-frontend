@@ -10,6 +10,8 @@ interface LoginButtonProps {
   hideTextOnMobile?: boolean;
 }
 
+
+
 export const LoginButton = ({
   className,
   variant = "default",
