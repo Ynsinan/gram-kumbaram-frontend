@@ -34,3 +34,5 @@ jobs:
           build-args: |
             NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
             NEXT_PUBLIC_FRONTEND_URL=${{ secrets.NEXT_PUBLIC_FRONTEND_URL }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/Ynsinan/gram-kumbaram-frontend
